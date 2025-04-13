@@ -1,6 +1,10 @@
 import time  
 import tracemalloc  # Pour mesurer l'utilisation mémoire
 import heapq  # Pour le tri par tas (utilise une file de priorité = tas binaire)
+import random # Pour générer les chiffres aléatoires dont l'utilisateur va choisir le nombre 
+import matplotlib.pyplot as plt
+import json
+import os
 
 # -------------------------
 # Fonction : Tri par sélection
@@ -137,6 +141,69 @@ def mesurer_temps_et_tri(nom, fonction, tableau):
 
     return nom, duree, memoire_ko, resultat
 
+# Genération de nombres aléatoires dans un fichier texte
+def generer_nombres_aleatoires(fichier, quantite, min_val=0, max_val=10000):
+    """
+    Génère un fichier contenant 'quantite' nombres aléatoires entre min_val et max_val.
+    Chaque nombre est séparé par un espace.
+    """
+    with open(fichier, 'w') as f:
+        nombres = [str(random.randint(min_val, max_val)) for _ in range(quantite)]
+        f.write(" ".join(nombres))
+    print(f"✅ {quantite} nombres ont été générés dans le fichier '{fichier}'.")
+
+def sauvegarder_resultats(resultats, fichier="resultats_tris.json"):
+    """Sauvegarde les résultats des tris dans un fichier JSON"""
+    with open(fichier, 'w') as f:
+        json.dump(resultats, f)
+
+def charger_resultats(fichier="resultats_tris.json"):
+    """Charge les résultats des tris depuis un fichier JSON"""
+    if os.path.exists(fichier):
+        with open(fichier, 'r') as f:
+            return json.load(f)
+    else:
+        # Structure initiale si le fichier n'existe pas
+        return {nom: {"tailles": [], "temps": []} for nom, _ in noms_tris}
+
+# Fonction pour tracer le graphique avec tous les résultats et annotations
+def tracer_graphique_complet(resultats):
+    plt.figure(figsize=(14, 8))
+    
+    for nom in resultats:
+        # Crée des paires (taille, temps) pour pouvoir les trier
+        points = list(zip(resultats[nom]["tailles"], resultats[nom]["temps"]))
+        # Trie les points par taille croissante
+        points.sort(key=lambda x: x[0])
+        
+        # Extrait les tailles et temps triés
+        tailles_triees = [p[0] for p in points]
+        temps_tries = [p[1] for p in points]
+        
+        # Trace la courbe avec points
+        plt.plot(tailles_triees, temps_tries, 'o-', label=nom)
+        
+        # Ajoute les annotations avec le nombre de chiffres triés pour chaque point
+        for taille, temps in zip(tailles_triees, temps_tries):
+            # Ajoute une petit décalage pour éviter que les annotations se superposent
+            plt.annotate(f"{taille}", 
+                        (taille, temps),
+                        textcoords="offset points", 
+                        xytext=(0, 10),  # Décalage par rapport au point
+                        ha='center',     # Alignement horizontal centré
+                        fontsize=8,      # Taille de police plus petite
+                        bbox=dict(boxstyle="round,pad=0.3", fc="white", alpha=0.7))
+    
+    plt.xlabel("Nombre de données")
+    plt.ylabel("Temps d'exécution (s)")
+    plt.title("Temps d'exécution des algorithmes de tri selon la taille des données")
+    plt.legend()
+    plt.grid(True)
+    plt.yscale('log')  # Échelle logarithmique
+    plt.xscale('log')  # Échelle logarithmique aussi pour x
+    plt.tight_layout()
+    plt.show()
+
 # -------------------------
 # Programme principal
 # -------------------------
@@ -152,30 +219,56 @@ if __name__ == "__main__":
         ("Tri à peigne", tri_peigne),
     ]
 
+    # Demander si on doit réinitialiser les résultats
+    reset = input("Voulez-vous réinitialiser les résultats précédents ? (o/n): ").lower() == 'o'
+    
+    if reset:
+        resultats = {nom: {"tailles": [], "temps": []} for nom, _ in noms_tris}
+    else:
+        resultats = charger_resultats()
+    
+    # Génération du fichier de nombres
+    fichier = "nombres.txt"
+    nb_nombres = int(input("Combien de nombres veux-tu générer dans le fichier ? "))
+    generer_nombres_aleatoires(fichier, nb_nombres)
+
     # Lecture des données depuis le fichier texte
-    data = charger_nombres("nombres.txt")
+    data = charger_nombres(fichier)
 
     # Liste pour stocker les résultats (nom, temps, tableau trié)
-    resultats = []
+    resultats_tri = []
 
     print("\nRésultats pour chaque algorithme :\n")
 
     for nom, fonction in noms_tris:
-        nom_tri, temps, memoire_ko, resultat = mesurer_temps_et_tri(nom, fonction, data)
-        resultats.append((nom_tri, temps, memoire_ko, resultat))  # On garde les données sans les afficher
-
+        print(f"Exécution de {nom}...")
+        nom_tri, temps, memoire_ko, resultat_tri = mesurer_temps_et_tri(nom, fonction, data)
+        resultats_tri.append((nom_tri, temps, memoire_ko, resultat_tri))  # On garde les données sans les afficher
+        
+        # Ajouter les résultats aux données existantes pour le graphique
+        resultats[nom]["tailles"].append(nb_nombres)
+        resultats[nom]["temps"].append(temps)
+        
+        print(f"{nom} → {temps:.6f} sec | {memoire_ko} Ko utilisés")
 
     # Trie les algorithmes par temps (plus rapide en premier)
-    resultats.sort(key=lambda x: x[1])
+    resultats_tri.sort(key=lambda x: x[1])
 
-    # Affiche le classement final
+    # Affiche le classement final par rapidité
     print("\n🏁 Classement final des algorithmes par rapidité :")
-    for i, (nom, temps, memoire_ko, _) in enumerate(resultats, 1):
+    for i, (nom, temps, memoire_ko, _) in enumerate(resultats_tri, 1):
         print(f"{i}. {nom} → {temps:.6f} sec | {memoire_ko} Ko utilisés")
 
     # Trie les résultats par mémoire utilisée (du plus petit au plus grand)
-    resultats_par_memoire = sorted(resultats, key=lambda x: x[2])  # x[2] = mémoire en Ko
+    resultats_par_memoire = sorted(resultats_tri, key=lambda x: x[2])  # x[2] = mémoire en Ko
 
+    # Affiche le classement final par mémoire
     print("\n💾 Classement final des algorithmes par mémoire utilisée :")
     for i, (nom, temps, memoire_ko, _) in enumerate(resultats_par_memoire, 1):
         print(f"{i}. {nom} → {memoire_ko} Ko | {temps:.6f} sec")
+    
+    # Sauvegarder tous les résultats
+    sauvegarder_resultats(resultats)
+    
+    # Tracer le graphique avec tous les résultats accumulés
+    tracer_graphique_complet(resultats)
