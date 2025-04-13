@@ -7,8 +7,9 @@ Il compare les performances **en temps d'exécution** et **en complexité spatia
 
 ## 📂 Structure du projet
 
-programm.py contien le code python qui déploit les tri sur les chiffres du fichier txt 
-nombre.txt contien les chiffres choisit 
+-programm.py contien le code python qui déploit les tri sur les chiffres du fichier txt 
+
+-nombre.txt contien les chiffres choisit 
 
 
 ---
