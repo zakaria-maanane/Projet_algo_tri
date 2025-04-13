@@ -56,3 +56,4 @@ Résultats - Complexité spatiale estimée :
 
 Tri le plus rapide : Quick Sort
 Tri le plus économique en mémoire : Insertion Sort
+![Capture d'écran 2025-04-11 131206](https://github.com/user-attachments/assets/fe7cd9b0-07ef-4b22-8706-83fc2ed1e870)
