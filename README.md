@@ -7,10 +7,9 @@ Il compare les performances **en temps d'exécution** et **en complexité spatia
 
 ## 📂 Structure du projet
 
-- `data.txt` : fichier contenant la liste de nombres à trier (un seul nombre par ligne, ou séparés par des virgules/espaces).
-- `main.py` : script principal contenant l'exécution des algorithmes, les mesures, et le classement.
-- `sorting_algorithms.py` : implémentation des algorithmes de tri.
-- `results.txt` *(optionnel)* : export des résultats comparatifs.
+programm.py contien le code python qui déploit les tri sur les chiffres du fichier txt 
+nombre.txt contien les chiffres choisit 
+
 
 ---
 
