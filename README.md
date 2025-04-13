@@ -41,6 +41,8 @@ Il compare les performances **en temps d'exécution** et **en complexité spatia
 
 ## 📈 Exemple de sortie (console)
 SORTIE GRAPHIQUE 
+![image](https://github.com/user-attachments/assets/ce6cafc7-d26c-43be-a6ea-7df2a51fc0a7)
+
 [Capture d'écran 2025-04-11 131206](https://github.com/user-attachments/assets/fe7cd9b0-07ef-4b22-8706-83fc2ed1e870)
 
 ```bash
